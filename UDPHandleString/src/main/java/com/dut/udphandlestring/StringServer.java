@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,14 +20,14 @@ public class StringServer implements Runnable {
     
     DatagramSocket serverSocket;
     DatagramPacket receivePacket;
+    DatagramPacket sendPacket;
 
-    public StringServer() throws IOException {
+    public StringServer() {
         try {
             this.serverSocket = new DatagramSocket(7778);
             System.out.println("Server is started");
         } catch (Exception e) {
         }
-        
     }
     
     private static String thuongHoa(String str) {
@@ -104,7 +103,7 @@ public class StringServer implements Runnable {
                 System.out.println(s);
                 sendData = s.toString().getBytes("UTF-8");
 
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+                this.sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
                 serverSocket.send(sendPacket);
             } catch (IOException ex) {
                 Logger.getLogger(StringServer.class.getName()).log(Level.SEVERE, null, ex);
