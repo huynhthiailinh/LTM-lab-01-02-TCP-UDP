@@ -312,7 +312,7 @@ public class ChatClient extends javax.swing.JFrame {
                     String str = socketInputStream.readUTF();
                     jTextArea.append(str + "\n");
                 } catch (SocketException e3){
-                    System.out.println("bye!!");
+                    System.out.println("Disconnected!!");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
