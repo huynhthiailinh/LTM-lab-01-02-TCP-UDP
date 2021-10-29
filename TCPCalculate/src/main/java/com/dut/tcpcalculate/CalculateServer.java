@@ -30,6 +30,29 @@ public class CalculateServer implements Runnable {
         System.out.println("Server is started");
     }
     
+    public static void main(String[] args) throws IOException {
+        Thread thread = new Thread(new CalculateServer());
+        thread.start();
+    }
+
+    @Override
+    public void run() {
+        String input, output;
+        while(true) {
+            try {
+                this.socket = this.serverSocket.accept();
+                this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                this.dataInputStream = new DataInputStream(socket.getInputStream());
+                
+                input = this.dataInputStream.readUTF();
+                output = "Kết quả: " + execute(input);
+                this.dataOutputStream.writeUTF(output);
+            } catch (IOException ex) {
+                Logger.getLogger(CalculateServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
     private String execute(String str){
         String v = "";
         Stack<String> numst= new Stack<String>();
@@ -137,26 +160,4 @@ public class CalculateServer implements Runnable {
         return -1;
     }
     
-    public static void main(String[] args) throws IOException {
-        Thread thread = new Thread(new CalculateServer());
-        thread.start();
-    }
-
-    @Override
-    public void run() {
-        String input, output;
-        while(true) {
-            try {
-                this.socket = this.serverSocket.accept();
-                this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                this.dataInputStream = new DataInputStream(socket.getInputStream());
-                
-                input = this.dataInputStream.readUTF();
-                output = "Kết quả: " + execute(input);
-                this.dataOutputStream.writeUTF(output);
-            } catch (IOException ex) {
-                Logger.getLogger(CalculateServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
 }
