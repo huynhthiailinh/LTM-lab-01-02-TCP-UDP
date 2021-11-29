@@ -22,14 +22,13 @@ public class ChatServer {
     private String dataStringFromClient;
     private boolean isStarted;
     private ServerSocket serverWithoutUI;
-    List<Client> clientList = new ArrayList<Client>();
+    List<Client> clientList = new ArrayList<>();
     
     public ChatServer() {
         super();
     }
     
     public void startServer() {
-        
         try {
             serverWithoutUI = new ServerSocket(2808);
             isStarted = true;

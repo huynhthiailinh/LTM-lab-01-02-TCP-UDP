@@ -25,8 +25,9 @@ public class StringClient extends javax.swing.JFrame {
     /**
      * Creates new form ServerString
      */
-    public StringClient() {
+    public StringClient() throws IOException {
         initComponents();
+        this.socket = new Socket("localhost", 2808);
     }
 
     /**
@@ -96,7 +97,6 @@ public class StringClient extends javax.swing.JFrame {
 
     private void jButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonActionPerformed
         try {
-            this.socket = new Socket("localhost", 8977);
             this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
             this.dataInputStream = new DataInputStream(socket.getInputStream());
             String output = jTextField.getText();
@@ -142,7 +142,11 @@ public class StringClient extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new StringClient().setVisible(true);
+                try {
+                    new StringClient().setVisible(true);
+                } catch (IOException ex) {
+                    Logger.getLogger(StringClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }

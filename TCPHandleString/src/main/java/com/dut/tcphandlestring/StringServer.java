@@ -10,103 +10,141 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author z
  */
-public class StringServer implements Runnable {
+public class StringServer {
     
-    ServerSocket serverSocket;
-    Socket socket;
-    DataOutputStream dataOutputStream;
-    DataInputStream dataInputStream;
-
-    public StringServer() throws IOException {
-        this.serverSocket = new ServerSocket(8977);
-        System.out.println("Server is started");
+    private String input;
+    private boolean isStarted;
+    private ServerSocket serverSocket;
+    List<Client> clientList = new ArrayList<>();
+    
+    public StringServer() {
+        super();
     }
     
-    public static void main(String[] args) throws IOException {
-        Thread thread = new Thread(new StringServer());
-        thread.start();
+    public void startServer() {
+        try {
+            serverSocket = new ServerSocket(2808);
+            isStarted = true;
+            System.out.println("Server is started!");
+            while (isStarted) {
+                Client st = new Client(serverSocket.accept());
+                new Thread(st).start();
+                clientList.add(st);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
-    @Override
-    public void run() {
-        String input, output;
-        while(true) {
+    
+    class Client implements Runnable {
+        private Socket s;
+        private DataInputStream dis;
+        private DataOutputStream dos;
+        private boolean isAcceptStarted = false;
+        
+        public Client(Socket s) {
+            this.s = s;
+        }
+        
+        public void send(String str) {
             try {
-                this.socket = this.serverSocket.accept();
-                this.dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                this.dataInputStream = new DataInputStream(socket.getInputStream());
+                dos.writeUTF(str);
+            } catch (IOException e) {}
+        }
+        
+        @Override
+        public void run() {
+            try {
+                System.out.println("Connect successed!");
+                isAcceptStarted = true;
+                dis = new DataInputStream(s.getInputStream());
+                dos = new DataOutputStream(s.getOutputStream());
                 
-                input = this.dataInputStream.readUTF();
-                System.out.println();
-                output = "Chuỗi: " + input
+                while(isAcceptStarted) {
+                    input = dis.readUTF();
+                    System.out.println("input: " + input);
+                    String output = "Chuỗi: " + input
                         + "\nChuỗi in hoa: " + this.chuoiHoa(input)
                         + "\nChuỗi thường: " + this.chuoiThuong(input)
                         + "\nChuỗi vừa hoa vừa thường: " + this.chuoiVuaHoaVuaThuong(input)
                         + "\nSố từ của chuỗi: " + this.soTu(input);
+                    this.send(output);
+                }
 
-                this.dataOutputStream.writeUTF(output);
-            } catch (IOException ex) {
-                Logger.getLogger(StringServer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception e) {
+                clientList.remove(this);
+            } finally {
+                try {
+                    if (s != null) s.close();
+                    if (dis != null) dis.close();
+                    if (dos != null) dos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-    }
         
-    public String chuoiVuaHoaVuaThuong(String str) {
-        char c;
-        String result = "";
-        for (int i=0; i<str.length(); i++) {
-            c  = str.charAt(i);
-            if (c >= 'a' && c <= 'z') {
-                c = (char) (c-32);
-            } else if (c >= 'A' && c <= 'Z') {
-                c = (char) (c+32);
+        public String chuoiVuaHoaVuaThuong(String str) {
+            char c;
+            String result = "";
+            for (int i=0; i<str.length(); i++) {
+                c  = str.charAt(i);
+                if (c >= 'a' && c <= 'z') {
+                    c = (char) (c-32);
+                } else if (c >= 'A' && c <= 'Z') {
+                    c = (char) (c+32);
+                }
+                result += c;
             }
-            result += c;
+            return result;
         }
-        return result;
+    
+        public String chuoiHoa(String str) {
+            char c;
+            String result = "";
+            for (int i=0; i<str.length(); i++) {
+                c  = str.charAt(i);
+                if (c >= 'a' && c <= 'z') {
+                    c = (char) (c-32);
+                }
+                result += c;
+            }
+            return result;
+        }
+    
+        public String chuoiThuong(String str) {
+            char c;
+            String result = "";
+            for (int i=0; i<str.length(); i++) {
+                c  = str.charAt(i);
+                if (c >= 'A' && c <= 'Z') {
+                    c = (char) (c+32);
+                }
+                result += c;
+            }
+            return result;
+        }
+    
+        public int soTu(String str) {
+            int result = 0;
+            for (String s : str.split(" ")) {
+                if (!s.trim().equals("")) {
+                    result++;
+                }
+            }
+            return result;
+        }
     }
     
-    public String chuoiHoa(String str) {
-        char c;
-        String result = "";
-        for (int i=0; i<str.length(); i++) {
-            c  = str.charAt(i);
-            if (c >= 'a' && c <= 'z') {
-                c = (char) (c-32);
-            }
-            result += c;
-        }
-        return result;
-    }
-    
-    public String chuoiThuong(String str) {
-        char c;
-        String result = "";
-        for (int i=0; i<str.length(); i++) {
-            c  = str.charAt(i);
-            if (c >= 'A' && c <= 'Z') {
-                c = (char) (c+32);
-            }
-            result += c;
-        }
-        return result;
-    }
-    
-    public int soTu(String str) {
-        int result = 0;
-        for (String s : str.split(" ")) {
-            if (!s.trim().equals("")) {
-                result++;
-            }
-        }
-        return result;
-    }
+    public static void main(String[] args) {
+        new StringServer().startServer();
+    } 
     
 }
