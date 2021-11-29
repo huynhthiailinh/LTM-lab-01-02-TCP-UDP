@@ -145,6 +145,6 @@ public class StringServer {
     
     public static void main(String[] args) {
         new StringServer().startServer();
-    } 
+    }
     
 }
