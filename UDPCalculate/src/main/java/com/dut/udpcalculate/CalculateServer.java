@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.dut.udpcalculate;
 
 import java.io.IOException;
@@ -13,10 +8,6 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author z
- */
 public class CalculateServer implements Runnable {
     
     DatagramSocket serverSocket;
@@ -28,24 +19,16 @@ public class CalculateServer implements Runnable {
         byte[] sendData = new byte[1024];
         byte[] receiveData = new byte[1024];
         while (true) {
-            //Tao goi rong de nhan du lieu tu client
             this.receivePacket = new DatagramPacket(receiveData, receiveData.length);
             
             try {
-                //Nhan du lieu tu client
                 serverSocket.receive(receivePacket);
-                
-                //Lay dia chi ip cua may client
                 InetAddress IPAddress = receivePacket.getAddress();
-
-                //Lay port cua chuong trinh client
                 int port = receivePacket.getPort();
                 
                 String request = new String(receivePacket.getData(), "UTF-8");
                 
-                String s = "";
-
-                s = "Ket qua: " + execute(request);
+                String s = "Ket qua: " + execute(request);
 
                 sendData = s.toString().getBytes("UTF-8");
 

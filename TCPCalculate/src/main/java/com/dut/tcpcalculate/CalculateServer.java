@@ -10,8 +10,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 /**
@@ -24,7 +22,6 @@ public class CalculateServer {
     private String output;
     private boolean isStarted;
     private ServerSocket serverSocket;
-    List<Client> clientList = new ArrayList<>();
     
     public CalculateServer() {
         super();
@@ -38,7 +35,6 @@ public class CalculateServer {
             while (isStarted) {
                 Client st = new Client(serverSocket.accept());
                 new Thread(st).start();
-                clientList.add(st);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,7 +73,7 @@ public class CalculateServer {
                 }
 
             } catch (Exception e) {
-                clientList.remove(this);
+                System.out.println(e);
             } finally {
                 try {
                     if (s != null) s.close();

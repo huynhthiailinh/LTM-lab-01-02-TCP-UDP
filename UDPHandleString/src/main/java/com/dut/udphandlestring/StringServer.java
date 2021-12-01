@@ -1,48 +1,63 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.dut.udphandlestring;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author z
- */
-public class StringServer implements Runnable {
+public class StringServer {
     
-    DatagramSocket serverSocket;
-    DatagramPacket receivePacket;
-    DatagramPacket sendPacket;
-
-    public StringServer() {
+    public static DatagramSocket datagramSocket;
+    
+    public static void main(String[] args) {
         try {
-            this.serverSocket = new DatagramSocket(7778);
-            System.out.println("Server is started");
-        } catch (Exception e) {
-        }
-    }
-    
-    private static String thuongHoa(String str) {
-        String temp = "";
-        for (int i=0; i<str.length(); i++) {
-            char ch = str.charAt(i);
-            if (ch>='a' && ch<='z') {
-                ch = (char) (ch-32);
+            datagramSocket = new DatagramSocket(7778);
+            System.out.println("Server is started!");
+            while (true) {  
+                byte[] receiveData = new byte[1024];
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                datagramSocket.receive(receivePacket);
+                Thread thread = new Thread(new Client(receivePacket));
+                thread.start();
             }
-            temp += ch;
+        } catch (IOException e) {
+            System.out.println(e);
         }
-        return temp;
     }
     
-    private static String vuaHoaVuaThuong(String str) {
+}
+
+class Client implements Runnable {
+
+    private DatagramPacket datagramPacket;
+
+    public Client(DatagramPacket receivePacket) {
+        this.datagramPacket = receivePacket;
+    }
+
+    @Override
+    public void run() {
+        try {
+            byte[] sendData = new byte[1024];
+            InetAddress IPAddress = datagramPacket.getAddress();
+            int port = datagramPacket.getPort();
+            
+            String input = new String(datagramPacket.getData());
+            String output = "Chuoi in hoa: " + chuoiHoa(input).trim() + "\n"
+                    + "Chuoi thuong: " + chuoiThuong(input).trim() + "\n"
+                    + "Chuoi vua hoa vua thuong: " + chuoiVuaHoaVuaThuong(input).trim() + "\n"
+                    + "So tu cua chuoi: " + soTu(input);
+            
+            sendData = output.getBytes();
+            
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+            StringServer.datagramSocket.send(sendPacket);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
+    public String chuoiVuaHoaVuaThuong(String str) {
         char c;
         String result = "";
         for (int i=0; i<str.length(); i++) {
@@ -56,59 +71,41 @@ public class StringServer implements Runnable {
         }
         return result;
     }
-    
-    private static int soTu(String st) {
+
+    public String chuoiHoa(String str) {
         char c;
-        int dem = 0;
-        for (int j = st.length()-1; j>=0; j--) {
-            c = st.charAt(j);
-            if (c == ' ') 
-                dem++;
+        String result = "";
+        for (int i=0; i<str.length(); i++) {
+            c  = str.charAt(i);
+            if (c >= 'a' && c <= 'z') {
+                c = (char) (c-32);
+            }
+            result += c;
         }
-        dem++;
-        return dem;
-    }
-    
-    public static void main(String[] args) throws IOException {
-        Thread thread = new Thread(new StringServer());
-        thread.start();
+        return result;
     }
 
-    @Override
-    public void run() {
-        byte[] sendData = new byte[1024];
-        byte[] receiveData = new byte[1024];
-        while (true) {
-            //Tao goi rong de nhan du lieu tu client
-            this.receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            
-            try {
-                //Nhan du lieu tu client
-                serverSocket.receive(receivePacket);
-                
-                //Lay dia chi ip cua may client
-                InetAddress IPAddress = receivePacket.getAddress();
+    public String chuoiThuong(String str) {
+        char c;
+        String result = "";
+        for (int i=0; i<str.length(); i++) {
+            c  = str.charAt(i);
+            if (c >= 'A' && c <= 'Z') {
+                c = (char) (c+32);
+            }
+            result += c;
+        }
+        return result;
+    }
 
-                //Lay port cua chuong trinh client
-                int port = receivePacket.getPort();
-                
-                String request = new String(receivePacket.getData(), "UTF-8");
-                
-                String s="";
-
-                s += "Thuong hoa: " + thuongHoa(request).trim() + "\n";
-                s += "Vua hoa vua thuong: " + vuaHoaVuaThuong(request).trim() + "\n";
-                s += "So tu: " + soTu(request);
-
-                System.out.println(s);
-                sendData = s.toString().getBytes("UTF-8");
-
-                this.sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-                serverSocket.send(sendPacket);
-            } catch (IOException ex) {
-                Logger.getLogger(StringServer.class.getName()).log(Level.SEVERE, null, ex);
+    public int soTu(String str) {
+        int result = 0;
+        for (String s : str.split(" ")) {
+            if (!s.trim().equals("")) {
+                result++;
             }
         }
+        return result;
     }
     
 }

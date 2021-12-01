@@ -22,7 +22,7 @@ public class ChatServer {
     private String dataStringFromClient;
     private boolean isStarted;
     private ServerSocket serverWithoutUI;
-    List<Client> clientList = new ArrayList<Client>();
+    List<Client> clientList = new ArrayList<>();
     
     public ChatServer() {
         super();

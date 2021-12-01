@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.dut.tcphandlestring;
 
 import java.io.DataInputStream;
@@ -10,19 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- *
- * @author z
- */
 public class StringServer {
     
     private String input;
+    private String output;
     private boolean isStarted;
     private ServerSocket serverSocket;
-    List<Client> clientList = new ArrayList<>();
     
     public StringServer() {
         super();
@@ -36,9 +25,8 @@ public class StringServer {
             while (isStarted) {
                 Client st = new Client(serverSocket.accept());
                 new Thread(st).start();
-                clientList.add(st);
             }
-        } catch (IOException e) {
+        }  catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -69,8 +57,7 @@ public class StringServer {
                 
                 while(isAcceptStarted) {
                     input = dis.readUTF();
-                    System.out.println("input: " + input);
-                    String output = "Chuỗi: " + input
+                    output = "Chuỗi: " + input
                         + "\nChuỗi in hoa: " + this.chuoiHoa(input)
                         + "\nChuỗi thường: " + this.chuoiThuong(input)
                         + "\nChuỗi vừa hoa vừa thường: " + this.chuoiVuaHoaVuaThuong(input)
@@ -79,7 +66,7 @@ public class StringServer {
                 }
 
             } catch (Exception e) {
-                clientList.remove(this);
+                System.out.println(e);
             } finally {
                 try {
                     if (s != null) s.close();
